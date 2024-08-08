@@ -26,8 +26,14 @@ public class StudentController {
     @ResponseBody
     ResponseEntity<Student>  saveStudent(@RequestBody Student student){
         Student newStudent = studentService.saveStudent(student);
-      return  new ResponseEntity<>(newStudent, HttpStatus.CREATED);
-        /*return  ResponseEntity.created().body(newStudent);*/
+     /* return  new ResponseEntity<>(newStudent, HttpStatus.CREATED);
+        *//*return  ResponseEntity.created().body(newStudent);*/
+        if(newStudent==null){
+            return  new ResponseEntity<>(null, HttpStatus.FOUND);
+        } else {
+            return  new ResponseEntity<>(newStudent, HttpStatus.CREATED);
+        }
+
     }
 
     @GetMapping(value = "/documents/{docNumber}")

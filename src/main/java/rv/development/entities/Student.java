@@ -1,19 +1,23 @@
 package rv.development.entities;
 
+        import com.fasterxml.jackson.annotation.JsonFormat;
         import jakarta.persistence.Entity;
         import jakarta.persistence.Id;
         import jakarta.persistence.Table;
         import lombok.AllArgsConstructor;
-        import lombok.Data;
         import lombok.NoArgsConstructor;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.springframework.boot.context.properties.bind.Name;
+        import org.hibernate.grammars.hql.HqlParser;
+        import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalDate;
+
+        import java.time.LocalDate;
+        import java.time.format.DateTimeFormatter;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -43,8 +47,10 @@ public class Student {
    @Column (name ="last_name" , length = 50)
    private  String lastName;
 
+
     @Column (name ="birth_date")
-    private  LocalDate birthDate;
+    private LocalDate birthDate;
+
 
     @NotNull
     @Email

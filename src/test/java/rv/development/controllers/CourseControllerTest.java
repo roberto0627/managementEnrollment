@@ -93,18 +93,18 @@ public class CourseControllerTest {
 
     @Test
     public void addExistingCourse_success() throws Exception{
-        Mockito.when(courseRepository.existsByCourseName("Matematica")).thenReturn(true);
+        Mockito.when(courseRepository.existsByCourseName("Religion")).thenReturn(true);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/api/courses")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(course1))
+                        .content(mapper.writeValueAsString(course2))
                 )
                 .andExpect(status().isFound());
     }
 
     @Test
-    public void findCourseByName_success() throws Exception{
+    public void findCourseByName_success() throws Exception {
         Mockito.when(courseRepository.findByCourseName("Matematica")).thenReturn(course1);
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -112,7 +112,7 @@ public class CourseControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$",notNullValue()));
+                .andExpect(jsonPath("$", notNullValue()));
     }
 
     @Test
