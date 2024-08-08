@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -20,6 +19,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 @WebMvcTest(StudentController.class)
 @Import(StudentServiceImpl.class)
-public class StudentControllerTest {
+class StudentControllerTest {
     @Autowired
     MockMvc mockMvc;
 
@@ -43,7 +43,7 @@ public class StudentControllerTest {
     Student  student5 = new Student(5L,"DNI", "46874219", "Frank", "Castillo", LocalDate.of(1998,9,12), "frank.castillo@gmail.com", false );
 
     @Test
-    public void getAllActivatedStudents_success() throws Exception{
+    void getAllActivatedStudents_success() throws Exception{
         List<Student> students= new ArrayList<>(Arrays.asList(student1,student2,student3));
         Mockito.when(studentRepository.findByActivated(true)).thenReturn(students);
 
@@ -56,7 +56,7 @@ public class StudentControllerTest {
     }
 
     @Test
-    public void getAllDeactivatedStudents_success() throws Exception{
+    void getAllDeactivatedStudents_success() throws Exception{
         List<Student> students= new ArrayList<>(Arrays.asList(student4,student5));
         Mockito.when(studentRepository.findByActivated(false)).thenReturn(students);
 
@@ -69,7 +69,7 @@ public class StudentControllerTest {
     }
 
     @Test
-    public void addNewStudent_success() throws Exception{
+    void addNewStudent_success() throws Exception{
         Student newStudent = new Student();
         newStudent.setDocType("DNI");
         newStudent.setDocNumber("46657897");
@@ -79,6 +79,7 @@ public class StudentControllerTest {
         newStudent.setEmail("jose.ruiz@gmail.com");
         newStudent.setActivated(true);
 
+        Mockito.when(studentRepository.existsByEmail(newStudent.getEmail())).thenReturn(false);
         Mockito.when(studentRepository.existsByDocNumber(newStudent.getDocNumber())).thenReturn(false);
         Mockito.when(studentRepository.save(any())).thenReturn(student1);
 
@@ -100,7 +101,76 @@ public class StudentControllerTest {
     }
 
     @Test
-    public void addExistingStudent_success() throws Exception{
+    void addNewStudent_existsEmailAndDocNumber() throws Exception{
+        Student newStudent = new Student();
+        newStudent.setDocType("DNI");
+        newStudent.setDocNumber("46657897");
+        newStudent.setFirstName("Jose");
+        newStudent.setLastName("Ruiz");
+        newStudent.setBirthDate(LocalDate.of(1994,8,5));
+        newStudent.setEmail("jose.ruiz@gmail.com");
+        newStudent.setActivated(true);
+
+        Mockito.when(studentRepository.existsByEmail(newStudent.getEmail())).thenReturn(true);
+        Mockito.when(studentRepository.existsByDocNumber(newStudent.getDocNumber())).thenReturn(true);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/api/students")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(newStudent))
+                )
+                .andExpect(status().isFound());
+    }
+
+    @Test
+    void addNewStudent_existsEmailAndNoExistsDocNumber() throws Exception{
+        Student newStudent = new Student();
+        newStudent.setDocType("DNI");
+        newStudent.setDocNumber("46657897");
+        newStudent.setFirstName("Jose");
+        newStudent.setLastName("Ruiz");
+        newStudent.setBirthDate(LocalDate.of(1994,8,5));
+        newStudent.setEmail("jose.ruiz@gmail.com");
+        newStudent.setActivated(true);
+
+        Mockito.when(studentRepository.existsByEmail(newStudent.getEmail())).thenReturn(true);
+        Mockito.when(studentRepository.existsByDocNumber(newStudent.getDocNumber())).thenReturn(false);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/api/students")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(newStudent))
+                )
+                .andExpect(status().isFound());
+    }
+
+    @Test
+    void addNewStudent_noExistsEmailAndExistsDocNumber() throws Exception{
+        Student newStudent = new Student();
+        newStudent.setDocType("DNI");
+        newStudent.setDocNumber("46657897");
+        newStudent.setFirstName("Jose");
+        newStudent.setLastName("Ruiz");
+        newStudent.setBirthDate(LocalDate.of(1994,8,5));
+        newStudent.setEmail("jose.ruiz@gmail.com");
+        newStudent.setActivated(true);
+
+        Mockito.when(studentRepository.existsByEmail(newStudent.getEmail())).thenReturn(false);
+        Mockito.when(studentRepository.existsByDocNumber(newStudent.getDocNumber())).thenReturn(true);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/api/students")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(newStudent))
+                )
+                .andExpect(status().isFound());
+    }
+
+    @Test
+    void addExistingStudent_success() throws Exception{
         Mockito.when(studentRepository.existsByEmail("jose.ruiz@gmail.com")).thenReturn(true);
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -112,7 +182,7 @@ public class StudentControllerTest {
     }
 
     @Test
-    public void findStudentByDocument_success() throws Exception{
+    void findStudentByDocument_success() throws Exception{
         Mockito.when(studentRepository.findByDocNumber("46657897")).thenReturn(student1);
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -124,7 +194,7 @@ public class StudentControllerTest {
     }
 
     @Test
-    public void findStudentByDocumentNotFound_success() throws Exception{
+    void findStudentByDocument_notFound() throws Exception{
         Mockito.when(studentRepository.findByDocNumber("46657897")).thenReturn(null);
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -135,7 +205,7 @@ public class StudentControllerTest {
     }
 
     @Test
-    public void findStudentByEmail_success() throws Exception{
+    void findStudentByEmail_success() throws Exception{
         Mockito.when(studentRepository.findByEmail("jose.ruiz@gmail.com")).thenReturn(student1);
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -147,7 +217,7 @@ public class StudentControllerTest {
     }
 
     @Test
-    public void findStudentByEmailNotFound_success() throws Exception{
+    void findStudentByEmail_notFound() throws Exception{
         Mockito.when(studentRepository.findByEmail("jose.ruiz@gmail.com")).thenReturn(null);
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -157,20 +227,46 @@ public class StudentControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-
     @Test
-    public void updateStudentNotFound_success() throws Exception{
+    void updateStudent_success() throws Exception{
         Student newStudent = new Student();
         newStudent.setDocType("DNI");
         newStudent.setDocNumber("46657897");
         newStudent.setFirstName("Jose");
-        newStudent.setLastName("Ruiz");
+        newStudent.setLastName("Ruiz Suarez");
         newStudent.setBirthDate(LocalDate.of(1994,8,5));
         newStudent.setEmail("jose.ruiz@gmail.com");
         newStudent.setActivated(true);
         newStudent.setId(1L);
 
-        Mockito.when(studentRepository.existsById(1L)).thenReturn(false);
+        Mockito.when(studentRepository.existsByDocNumber(newStudent.getDocNumber())).thenReturn(true);
+        Mockito.when(studentRepository.findByDocNumber(newStudent.getDocNumber())).thenReturn(student1);
+        Mockito.when(studentRepository.save(newStudent)).thenReturn(newStudent);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/students")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(newStudent))
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.lastName").value("Ruiz Suarez"));
+    }
+
+    @Test
+    void updateStudent_noPresent() throws Exception{
+        Student newStudent = new Student();
+        newStudent.setDocType("DNI");
+        newStudent.setDocNumber("12345678");
+        newStudent.setFirstName("Jose");
+        newStudent.setLastName("Ruiz Suarez");
+        newStudent.setBirthDate(LocalDate.of(1994,8,5));
+        newStudent.setEmail("jose.ruiz@gmail.com");
+        newStudent.setActivated(true);
+        newStudent.setId(0L);
+
+        Mockito.when(studentRepository.existsByDocNumber(newStudent.getDocNumber())).thenReturn(true);
+        Mockito.when(studentRepository.findByDocNumber(newStudent.getDocNumber())).thenReturn(student1);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/api/students")
@@ -181,14 +277,92 @@ public class StudentControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void updateStudent_noPresentDocNumberAndPresentId() throws Exception{
+        Student newStudent = new Student();
+        newStudent.setDocType("DNI");
+        newStudent.setDocNumber("12345678");
+        newStudent.setFirstName("Jose");
+        newStudent.setLastName("Ruiz Suarez");
+        newStudent.setBirthDate(LocalDate.of(1994,8,5));
+        newStudent.setEmail("jose.ruiz@gmail.com");
+        newStudent.setActivated(true);
+        newStudent.setId(1L);
 
+        Mockito.when(studentRepository.existsByDocNumber(newStudent.getDocNumber())).thenReturn(true);
+        Mockito.when(studentRepository.findByDocNumber(newStudent.getDocNumber())).thenReturn(student1);
 
-
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/students")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(newStudent))
+                )
+                .andExpect(status().isNotFound());
+    }
 
     @Test
-    public void deleteExistingStudentById_success() throws Exception{
+    void updateStudent_presentDocNumberAndNoPresentId() throws Exception{
+        Student newStudent = new Student();
+        newStudent.setDocType("DNI");
+        newStudent.setDocNumber("46657897");
+        newStudent.setFirstName("Jose");
+        newStudent.setLastName("Ruiz Suarez");
+        newStudent.setBirthDate(LocalDate.of(1994,8,5));
+        newStudent.setEmail("jose.ruiz@gmail.com");
+        newStudent.setActivated(true);
+        newStudent.setId(0L);
+
+        Mockito.when(studentRepository.existsByDocNumber(newStudent.getDocNumber())).thenReturn(true);
+        Mockito.when(studentRepository.findByDocNumber(newStudent.getDocNumber())).thenReturn(student1);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/students")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(newStudent))
+                )
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void updateStudent_NotFound() throws Exception{
+        Student newStudent = new Student();
+        newStudent.setDocType("DNI");
+        newStudent.setDocNumber("46657897");
+        newStudent.setFirstName("Jose");
+        newStudent.setLastName("Ruiz");
+        newStudent.setBirthDate(LocalDate.of(1994,8,5));
+        newStudent.setEmail("jose.ruiz@gmail.com");
+        newStudent.setActivated(true);
+        newStudent.setId(1L);
+
+        Mockito.when(studentRepository.existsByDocNumber(newStudent.getDocNumber())).thenReturn(false);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/students")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(newStudent))
+                )
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteExistingStudentById_success() throws Exception{
+        Student newStudent = new Student();
+        newStudent.setDocType("DNI");
+        newStudent.setDocNumber("46657897");
+        newStudent.setFirstName("Jose");
+        newStudent.setLastName("Ruiz");
+        newStudent.setBirthDate(LocalDate.of(1994,8,5));
+        newStudent.setEmail("jose.ruiz@gmail.com");
+        newStudent.setActivated(false);
+        newStudent.setId(1L);
+
         Mockito.when(studentRepository.existsById(1L)).thenReturn(true);
-        Mockito.doNothing().when(studentRepository).deleteById(1L);
+        Mockito.when(studentRepository.findById(1L)).thenReturn(Optional.of(student1));
+        Mockito.when(studentRepository.save(newStudent)).thenReturn(newStudent);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .delete("/api/students/ids/1")
@@ -198,11 +372,71 @@ public class StudentControllerTest {
     }
 
     @Test
-    public void deleteExistingStudentByIdNotFound_success() throws Exception{
+    void deleteExistingStudentById_noPresent() throws Exception{
+        Student newStudent = new Student();
+        newStudent.setDocType("DNI");
+        newStudent.setDocNumber("46657897");
+        newStudent.setFirstName("Jose");
+        newStudent.setLastName("Ruiz");
+        newStudent.setBirthDate(LocalDate.of(1994,8,5));
+        newStudent.setEmail("jose.ruiz@gmail.com");
+        newStudent.setActivated(false);
+        newStudent.setId(1L);
+
+        Mockito.when(studentRepository.existsById(1L)).thenReturn(true);
+        Mockito.when(studentRepository.findById(1L)).thenReturn(Optional.empty());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/api/students/ids/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteExistingStudentById_notFound() throws Exception{
+
         Mockito.when(studentRepository.existsById(1L)).thenReturn(false);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .delete("/api/students/ids/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteExistingStudentByDocNumber_success() throws Exception{
+        String docNumber = "46657897";
+
+        Student newStudent = new Student();
+        newStudent.setDocType("DNI");
+        newStudent.setDocNumber("46657897");
+        newStudent.setFirstName("Jose");
+        newStudent.setLastName("Ruiz");
+        newStudent.setBirthDate(LocalDate.of(1994,8,5));
+        newStudent.setEmail("jose.ruiz@gmail.com");
+        newStudent.setActivated(false);
+        newStudent.setId(1L);
+
+        Mockito.when(studentRepository.existsByDocNumber(docNumber)).thenReturn(true);
+        Mockito.when(studentRepository.findByDocNumber(docNumber)).thenReturn(student1);
+        Mockito.when(studentRepository.save(newStudent)).thenReturn(newStudent);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/api/students/documents/"+docNumber)
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void deleteExistingStudentByDocNumber_notFound() throws Exception{
+        String docNumber = "12345678";
+        Mockito.when(studentRepository.existsByDocNumber(docNumber)).thenReturn(false);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/api/students/documents/"+docNumber)
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isNotFound());

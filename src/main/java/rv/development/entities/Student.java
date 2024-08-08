@@ -1,28 +1,20 @@
 package rv.development.entities;
 
-        import com.fasterxml.jackson.annotation.JsonFormat;
-        import jakarta.persistence.Entity;
-        import jakarta.persistence.Id;
-        import jakarta.persistence.Table;
-        import lombok.AllArgsConstructor;
-        import lombok.NoArgsConstructor;
+import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
 import lombok.*;
-        import org.hibernate.grammars.hql.HqlParser;
-        import org.springframework.format.annotation.DateTimeFormat;
-
-
-        import java.time.LocalDate;
-        import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
+import java.util.Objects;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 
 @Entity
 @Table(name = "student")
@@ -59,6 +51,17 @@ public class Student {
 
     private Boolean activated = false;
 
+   @Override
+   public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Student student = (Student) o;
+    return id == student.id && Objects.equals(docType, student.docType) && Objects.equals(docNumber, student.docNumber) && Objects.equals(firstName, student.firstName) && Objects.equals(lastName, student.lastName) && Objects.equals(birthDate, student.birthDate) && Objects.equals(email, student.email) && Objects.equals(activated, student.activated);
+   }
 
+   @Override
+   public int hashCode() {
+    return Objects.hash(id, docType, docNumber, firstName, lastName, birthDate, email, activated);
+   }
 }
 

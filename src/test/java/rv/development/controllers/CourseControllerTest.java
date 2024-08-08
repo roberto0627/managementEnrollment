@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(CourseController.class)
 @Import(CourseServiceImpl.class)
-public class CourseControllerTest {
+class CourseControllerTest {
     @Autowired
     MockMvc mockMvc;
 
@@ -43,7 +43,7 @@ public class CourseControllerTest {
     Course course5 = new Course(5L,"Arte","ART",false);
 
     @Test
-    public void getAllActivatedCourses_success() throws Exception{
+    void getAllActivatedCourses_success() throws Exception{
         List<Course> courses= new ArrayList<>(Arrays.asList(course1,course2,course3));
         Mockito.when(courseRepository.findByActivated(true)).thenReturn(courses);
 
@@ -56,7 +56,7 @@ public class CourseControllerTest {
     }
 
     @Test
-    public void getAllDeactivatedCourses_success() throws Exception{
+    void getAllDeactivatedCourses_success() throws Exception{
         List<Course> courses= new ArrayList<>(Arrays.asList(course4,course5));
         Mockito.when(courseRepository.findByActivated(false)).thenReturn(courses);
 
@@ -69,7 +69,7 @@ public class CourseControllerTest {
     }
 
     @Test
-    public void addNewCourse_success() throws Exception{
+    void addNewCourse_success() throws Exception{
         Course newCourse = new Course();
         newCourse.setCourseName("Matematica");
         newCourse.setAcronymName("MAT");
@@ -92,7 +92,7 @@ public class CourseControllerTest {
     }
 
     @Test
-    public void addExistingCourse_success() throws Exception{
+    void addExistingCourse_success() throws Exception{
         Mockito.when(courseRepository.existsByCourseName("Religion")).thenReturn(true);
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -104,7 +104,7 @@ public class CourseControllerTest {
     }
 
     @Test
-    public void findCourseByName_success() throws Exception {
+    void findCourseByName_success() throws Exception {
         Mockito.when(courseRepository.findByCourseName("Matematica")).thenReturn(course1);
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -116,7 +116,7 @@ public class CourseControllerTest {
     }
 
     @Test
-    public void findCourseByNameNotFound_success() throws Exception{
+    void findCourseByNameNotFound_success() throws Exception{
         Mockito.when(courseRepository.findByCourseName("Matematica")).thenReturn(null);
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -128,7 +128,7 @@ public class CourseControllerTest {
     }
 
     @Test
-    public void findCourseByAcronym_success() throws Exception{
+    void findCourseByAcronym_success() throws Exception{
         Mockito.when(courseRepository.findByAcronymName("MAT")).thenReturn(course1);
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -140,7 +140,7 @@ public class CourseControllerTest {
     }
 
     @Test
-    public void findCourseByAcronymNotFound_success() throws Exception{
+    void findCourseByAcronymNotFound_success() throws Exception{
         Mockito.when(courseRepository.findByAcronymName("MAT")).thenReturn(null);
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -151,7 +151,7 @@ public class CourseControllerTest {
     }
 
     @Test
-    public void updateExistingCourse_success() throws Exception{
+    void updateExistingCourse_success() throws Exception{
         Course newCourse = new Course();
         newCourse.setCourseName("Matematica");
         newCourse.setAcronymName("MAT");
@@ -176,7 +176,7 @@ public class CourseControllerTest {
     }
 
     @Test
-    public void updateCourseNotFound_success() throws Exception{
+    void updateCourseNotFound_success() throws Exception{
         Course newCourse = new Course();
         newCourse.setCourseName("Matematica");
         newCourse.setAcronymName("MAT");
@@ -195,7 +195,7 @@ public class CourseControllerTest {
     }
 
     @Test
-    public void deleteExistingCourseById_success() throws Exception{
+    void deleteExistingCourseById_success() throws Exception{
         Mockito.when(courseRepository.existsById(1L)).thenReturn(true);
         Mockito.doNothing().when(courseRepository).deleteById(1L);
 
@@ -207,7 +207,7 @@ public class CourseControllerTest {
     }
 
     @Test
-    public void deleteCourseByIdNotFound_success() throws Exception{
+    void deleteCourseByIdNotFound_success() throws Exception{
         Mockito.when(courseRepository.existsById(1L)).thenReturn(false);
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -218,7 +218,7 @@ public class CourseControllerTest {
     }
 
     @Test
-    public void deleteExistingCourseByName_success() throws Exception{
+    void deleteExistingCourseByName_success() throws Exception{
         Mockito.when(courseRepository.existsByCourseName("Matematica")).thenReturn(true);
         Mockito.doNothing().when(courseRepository).deleteByCourseName("Matematica");
 
@@ -230,7 +230,7 @@ public class CourseControllerTest {
     }
 
     @Test
-    public void deleteCourseByNameNotFound_success() throws Exception{
+    void deleteCourseByNameNotFound_success() throws Exception{
         Mockito.when(courseRepository.existsByCourseName("Matematica")).thenReturn(false);
 
         mockMvc.perform(MockMvcRequestBuilders

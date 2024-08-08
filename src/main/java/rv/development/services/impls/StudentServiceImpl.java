@@ -7,11 +7,17 @@ import rv.development.repositories.StudentRepository;
 import rv.development.services.StudentService;
 
 import java.util.List;
+import java.util.Optional;
+
 @Service
 public class StudentServiceImpl implements StudentService {
-    @Autowired
-    private StudentRepository studentRepository;
 
+    StudentRepository studentRepository;
+
+    @Autowired
+    StudentServiceImpl(StudentRepository studentRepository){
+        this.studentRepository = studentRepository;
+    }
 
     public List<Student> showAllStudents(boolean activated) {
         return studentRepository.findByActivated(activated);
@@ -39,11 +45,12 @@ public class StudentServiceImpl implements StudentService {
 
 
     public Student updateStudent(Student student) {
-
         boolean existsDocNumber=studentRepository.existsByDocNumber(student.getDocNumber());
-        Student currentStudent = studentRepository.findByDocNumber(student.getDocNumber());
-        if(student.getId() > 0 && existsDocNumber && student.getDocNumber().equals(currentStudent.getDocNumber())){
-            return studentRepository.save(student);
+        if(existsDocNumber){
+            Student currentStudent = studentRepository.findByDocNumber(student.getDocNumber());
+            if(student.getId() > 0 && student.getDocNumber().equals(currentStudent.getDocNumber())){
+                return studentRepository.save(student);
+            }
         }
         return null;
     }
@@ -52,14 +59,13 @@ public class StudentServiceImpl implements StudentService {
     public Boolean deleteStudentById(long id) {
         boolean isDeleted  = false;
         boolean existsId=studentRepository.existsById(id);
-        try {
-            if(existsId){
-                studentRepository.deleteById(id);
+        if(existsId){
+            Optional<Student> student = studentRepository.findById(id);
+            if(student.isPresent()){
+                student.get().setActivated(false);
+                studentRepository.save(student.get());
                 isDeleted = true;
             }
-
-        }catch (Exception e){
-          e.printStackTrace();
         }
         return isDeleted;
     }
@@ -67,15 +73,13 @@ public class StudentServiceImpl implements StudentService {
 
     public Boolean deleteStudentByDocNumber(String docNumber) {
         boolean isDeleted  = false;
-        boolean existsDocNumber=studentRepository.existsByDocNumber(docNumber);
-        try {
-            if(existsDocNumber){
-                studentRepository.deleteByDocNumber(docNumber);
-                isDeleted = true;
-            }
 
-        }catch (Exception e){
-            e.printStackTrace();
+        boolean existsDocNumber=studentRepository.existsByDocNumber(docNumber);
+        if(existsDocNumber){
+            Student student = studentRepository.findByDocNumber(docNumber);
+            student.setActivated(false);
+            studentRepository.save(student);
+            isDeleted = true;
         }
         return isDeleted;
     }

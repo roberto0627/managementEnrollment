@@ -10,8 +10,12 @@ import java.util.List;
 @Service
 public class CourseServiceImpl implements CourseService {
 
-    @Autowired
     CourseRepository courseRepository;
+
+    @Autowired
+    CourseServiceImpl(CourseRepository courseRepository){
+        this.courseRepository = courseRepository;
+    }
 
     public List<Course> showAllCourses(boolean activated) {
         return courseRepository.findByActivated(activated);
@@ -45,13 +49,9 @@ public class CourseServiceImpl implements CourseService {
     public Boolean deleteCourseById(long id) {
         boolean isDeleted  = false;
         boolean existsId=courseRepository.existsById(id);
-        try {
-            if(existsId){
-                courseRepository.deleteById(id);
-                isDeleted = true;
-            }
-        } catch (Exception e){
-            System.out.println(e.getMessage());
+        if(existsId){
+            courseRepository.deleteById(id);
+            isDeleted = true;
         }
         return isDeleted;
     }
@@ -59,13 +59,9 @@ public class CourseServiceImpl implements CourseService {
     public Boolean deleteCourseByCourseName(String courseName) {
         boolean isDeleted  = false;
         boolean existsName=courseRepository.existsByCourseName(courseName);
-        try {
-            if(existsName){
-                courseRepository.deleteByCourseName(courseName);
-                isDeleted = true;
-            }
-        } catch (Exception e){
-            System.out.println(e.getMessage());
+        if(existsName){
+            courseRepository.deleteByCourseName(courseName);
+            isDeleted = true;
         }
         return isDeleted;
     }

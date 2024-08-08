@@ -8,28 +8,30 @@ import rv.development.entities.Student;
 import rv.development.services.StudentService;
 
 import java.util.List;
+
 @CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
 @RestController
 @RequestMapping("/api/students")
 public class StudentController {
+
+    StudentService studentService;
+
     @Autowired
-   private StudentService studentService;
+    StudentController(StudentService studentService){
+        this.studentService = studentService;
+    }
 
     @GetMapping(value = "")
-    @ResponseBody
     ResponseEntity<List<Student>> showAllStudents(@RequestParam boolean activated ){
         List<Student> students = studentService.showAllStudents(activated);
         return new ResponseEntity<>(students, HttpStatus.OK);
     }
 
     @PostMapping(value = "")
-    @ResponseBody
     ResponseEntity<Student>  saveStudent(@RequestBody Student student){
         Student newStudent = studentService.saveStudent(student);
-     /* return  new ResponseEntity<>(newStudent, HttpStatus.CREATED);
-        *//*return  ResponseEntity.created().body(newStudent);*/
         if(newStudent==null){
-            return  new ResponseEntity<>(null, HttpStatus.FOUND);
+            return  new ResponseEntity<>(HttpStatus.FOUND);
         } else {
             return  new ResponseEntity<>(newStudent, HttpStatus.CREATED);
         }
@@ -37,7 +39,6 @@ public class StudentController {
     }
 
     @GetMapping(value = "/documents/{docNumber}")
-    @ResponseBody
     ResponseEntity<Student> findByDocNumber(@PathVariable String docNumber ){
         Student foundStudent = studentService.findByDocNumber(docNumber);
         if(foundStudent == null){
@@ -47,7 +48,6 @@ public class StudentController {
     }
 
     @GetMapping(value = "/emails/{email}")
-    @ResponseBody
     ResponseEntity<Student> findByEmail(@PathVariable String email ){
         Student foundStudent = studentService.findByEmail(email);
         if(foundStudent == null){
@@ -57,7 +57,6 @@ public class StudentController {
     }
 
     @PutMapping (value = "")
-    @ResponseBody
     ResponseEntity<Student> updateStudent(@RequestBody Student student){
         Student newStudent = studentService.updateStudent(student);
         if(newStudent == null){
@@ -66,24 +65,21 @@ public class StudentController {
         return  new ResponseEntity<>(newStudent, HttpStatus.OK);
     }
 
-
     @DeleteMapping (value = "/ids/{id}")
     ResponseEntity<Boolean>  deleteStudentById(@PathVariable long id){
-        Boolean isDeleted = studentService.deleteStudentById(id);
-        if(isDeleted == null || !isDeleted  ){
+        boolean isDeleted = studentService.deleteStudentById(id);
+        if(!isDeleted){
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(isDeleted);
-
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(true);
     }
-
 
     @DeleteMapping (value = "/documents/{docNumber}")
     ResponseEntity<Boolean> deleteStudentByDocNumber(@PathVariable String docNumber){
-        Boolean isDeleted = studentService.deleteStudentByDocNumber(docNumber);
-        if(isDeleted == null || !isDeleted  ){
+        boolean isDeleted = studentService.deleteStudentByDocNumber(docNumber);
+        if(!isDeleted){
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(isDeleted);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(true);
     }
 }
