@@ -18,6 +18,7 @@ import rv.development.services.impls.CourseServiceImpl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,6 +42,9 @@ class CourseControllerTest {
     Course course3 = new Course(3L,"Comunicacion","COM",true);
     Course course4 = new Course(4L,"Ingles","ING",false);
     Course course5 = new Course(5L,"Arte","ART",false);
+
+    String courseName = "Matematica";
+    String acronym = "MAT";
 
     @Test
     void getAllActivatedCourses_success() throws Exception{
@@ -71,8 +75,8 @@ class CourseControllerTest {
     @Test
     void addNewCourse_success() throws Exception{
         Course newCourse = new Course();
-        newCourse.setCourseName("Matematica");
-        newCourse.setAcronymName("MAT");
+        newCourse.setCourseName(courseName);
+        newCourse.setAcronymName(acronym);
         newCourse.setActivated(true);
 
         Mockito.when(courseRepository.existsByCourseName(newCourse.getCourseName())).thenReturn(false);
@@ -92,7 +96,7 @@ class CourseControllerTest {
     }
 
     @Test
-    void addExistingCourse_success() throws Exception{
+    void addExistingCourse_found() throws Exception{
         Mockito.when(courseRepository.existsByCourseName("Religion")).thenReturn(true);
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -105,10 +109,10 @@ class CourseControllerTest {
 
     @Test
     void findCourseByName_success() throws Exception {
-        Mockito.when(courseRepository.findByCourseName("Matematica")).thenReturn(course1);
+        Mockito.when(courseRepository.findByCourseName(courseName)).thenReturn(course1);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/api/courses/names/Matematica")
+                        .get("/api/courses/names/"+courseName)
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
@@ -116,11 +120,11 @@ class CourseControllerTest {
     }
 
     @Test
-    void findCourseByNameNotFound_success() throws Exception{
-        Mockito.when(courseRepository.findByCourseName("Matematica")).thenReturn(null);
+    void findCourseByName_notFound() throws Exception{
+        Mockito.when(courseRepository.findByCourseName(courseName)).thenReturn(null);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/api/courses/names/Matematica")
+                        .get("/api/courses/names/"+courseName)
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isNotFound());
@@ -129,10 +133,10 @@ class CourseControllerTest {
 
     @Test
     void findCourseByAcronym_success() throws Exception{
-        Mockito.when(courseRepository.findByAcronymName("MAT")).thenReturn(course1);
+        Mockito.when(courseRepository.findByAcronymName(acronym)).thenReturn(course1);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/api/courses/acronyms/MAT")
+                        .get("/api/courses/acronyms/"+acronym)
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
@@ -140,11 +144,11 @@ class CourseControllerTest {
     }
 
     @Test
-    void findCourseByAcronymNotFound_success() throws Exception{
-        Mockito.when(courseRepository.findByAcronymName("MAT")).thenReturn(null);
+    void findCourseByAcronym_notFound() throws Exception{
+        Mockito.when(courseRepository.findByAcronymName(acronym)).thenReturn(null);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/api/courses/acronyms/MAT")
+                        .get("/api/courses/acronyms/"+acronym)
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isNotFound());
@@ -152,11 +156,7 @@ class CourseControllerTest {
 
     @Test
     void updateExistingCourse_success() throws Exception{
-        Course newCourse = new Course();
-        newCourse.setCourseName("Matematica");
-        newCourse.setAcronymName("MAT");
-        newCourse.setActivated(true);
-        newCourse.setId(1L);
+        Course newCourse = buildCourseRequest(1L, true);
 
         Mockito.when(courseRepository.existsById(1L)).thenReturn(true);
         Mockito.when(courseRepository.save(any())).thenReturn(course1);
@@ -176,12 +176,23 @@ class CourseControllerTest {
     }
 
     @Test
-    void updateCourseNotFound_success() throws Exception{
-        Course newCourse = new Course();
-        newCourse.setCourseName("Matematica");
-        newCourse.setAcronymName("MAT");
-        newCourse.setActivated(true);
-        newCourse.setId(1L);
+    void updateCourse_notFound() throws Exception{
+        Course newCourse = buildCourseRequest(1L, true);
+
+        Mockito.when(courseRepository.existsById(1L)).thenReturn(false);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/courses")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(newCourse))
+                )
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void updateCourseInvalidId_NotFound() throws Exception{
+        Course newCourse = buildCourseRequest(0L, true);
 
         Mockito.when(courseRepository.existsById(1L)).thenReturn(false);
 
@@ -196,8 +207,10 @@ class CourseControllerTest {
 
     @Test
     void deleteExistingCourseById_success() throws Exception{
+        Course newCourse = buildCourseRequest(1L, false);
         Mockito.when(courseRepository.existsById(1L)).thenReturn(true);
-        Mockito.doNothing().when(courseRepository).deleteById(1L);
+        Mockito.when(courseRepository.findById(1L)).thenReturn(Optional.of(course1));
+        Mockito.when(courseRepository.save(newCourse)).thenReturn(newCourse);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .delete("/api/courses/ids/1")
@@ -207,7 +220,20 @@ class CourseControllerTest {
     }
 
     @Test
-    void deleteCourseByIdNotFound_success() throws Exception{
+    void deleteExistingCourseById_notPresent() throws Exception{
+        Mockito.when(courseRepository.existsById(1L)).thenReturn(true);
+        Mockito.when(courseRepository.findById(1L)).thenReturn(Optional.empty());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/api/courses/ids/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isNotFound());
+    }
+
+
+    @Test
+    void deleteCourseById_notFound() throws Exception{
         Mockito.when(courseRepository.existsById(1L)).thenReturn(false);
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -219,24 +245,48 @@ class CourseControllerTest {
 
     @Test
     void deleteExistingCourseByName_success() throws Exception{
-        Mockito.when(courseRepository.existsByCourseName("Matematica")).thenReturn(true);
-        Mockito.doNothing().when(courseRepository).deleteByCourseName("Matematica");
+        Course newCourse = buildCourseRequest(1L, false);
+
+        Mockito.when(courseRepository.existsByCourseName(courseName)).thenReturn(true);
+        Mockito.when(courseRepository.findByCourseName(courseName)).thenReturn(course1);
+        Mockito.when(courseRepository.save(newCourse)).thenReturn(newCourse);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/api/courses/names/Matematica")
+                        .delete("/api/courses/names/"+courseName)
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    void deleteCourseByNameNotFound_success() throws Exception{
-        Mockito.when(courseRepository.existsByCourseName("Matematica")).thenReturn(false);
+    void deleteExistingCourseByName_notPresent() throws Exception{
+        Mockito.when(courseRepository.existsByCourseName(courseName)).thenReturn(true);
+        Mockito.when(courseRepository.findByCourseName(courseName)).thenReturn(null);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/api/courses/names/Matematica")
+                        .delete("/api/courses/names/"+courseName)
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteCourseByName_NotFound() throws Exception{
+        Mockito.when(courseRepository.existsByCourseName(courseName)).thenReturn(false);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/api/courses/names/"+courseName)
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isNotFound());
+    }
+
+    Course buildCourseRequest(Long id, boolean activated){
+        Course newCourse = new Course();
+        newCourse.setCourseName(courseName);
+        newCourse.setAcronymName(acronym);
+        newCourse.setActivated(activated);
+        newCourse.setId(id);
+        return newCourse;
     }
 }

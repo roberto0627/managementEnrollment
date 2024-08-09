@@ -8,6 +8,7 @@ import rv.development.entities.Course;
 import rv.development.services.CourseService;
 import java.util.List;
 
+@SuppressWarnings("unused")
 @CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
 @RestController
 @RequestMapping("/api/courses")

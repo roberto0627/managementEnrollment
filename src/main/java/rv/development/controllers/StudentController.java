@@ -9,6 +9,7 @@ import rv.development.services.StudentService;
 
 import java.util.List;
 
+@SuppressWarnings("unused")
 @CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
 @RestController
 @RequestMapping("/api/students")

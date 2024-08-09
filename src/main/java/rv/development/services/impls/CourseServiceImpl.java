@@ -6,6 +6,7 @@ import rv.development.entities.Course;
 import rv.development.repositories.CourseRepository;
 import rv.development.services.CourseService;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CourseServiceImpl implements CourseService {
@@ -50,8 +51,12 @@ public class CourseServiceImpl implements CourseService {
         boolean isDeleted  = false;
         boolean existsId=courseRepository.existsById(id);
         if(existsId){
-            courseRepository.deleteById(id);
-            isDeleted = true;
+            Optional<Course> course = courseRepository.findById(id);
+            if(course.isPresent()){
+                course.get().setActivated(false);
+                courseRepository.save(course.get());
+                isDeleted = true;
+            }
         }
         return isDeleted;
     }
@@ -60,8 +65,12 @@ public class CourseServiceImpl implements CourseService {
         boolean isDeleted  = false;
         boolean existsName=courseRepository.existsByCourseName(courseName);
         if(existsName){
-            courseRepository.deleteByCourseName(courseName);
-            isDeleted = true;
+            Course course = courseRepository.findByCourseName(courseName);
+            if(course != null){
+                course.setActivated(false);
+                courseRepository.save(course);
+                isDeleted = true;
+            }
         }
         return isDeleted;
     }
