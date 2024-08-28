@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: managementEnrollment
+  datasource:
+    hikari:
+      connectionTimeout: 20000
+      maximumPoolSize: 5
+    url: jdbc:postgresql://localhost:5432/enrolldb
+    username: postgres
+    password: postgres
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    generate-ddl: true
+
+enrollment:
+  app:
+    jwtCookieName: Cookie-App
+    jwtSecret: 4OUXHQ0sC0jzLmVJWa76fWHxgv98Jjib39ugEVgzwLkqCLjlbGTEuf7gB5VC6kLb
+    jwtExpirationMs: 1800000
