@@ -16,6 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import rv.development.services.impls.UserDetailsServiceImpl;
 
+@SuppressWarnings("unused")
 @Configuration
 @EnableMethodSecurity
 public class WebSecurityConfig {
@@ -59,7 +60,6 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/api/test/**").permitAll()
-                                .requestMatchers("/api/courses/**").authenticated()
                                 .anyRequest().authenticated()
                 );
         http.authenticationProvider(authenticationProvider());

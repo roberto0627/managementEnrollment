@@ -17,6 +17,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
+@SuppressWarnings("unused")
 @Component
 public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
@@ -41,8 +42,6 @@ public class JwtUtils {
         Instant issuedAt = Instant.now().truncatedTo(ChronoUnit.SECONDS);
         Instant expiration = issuedAt.plus(jwtExpirationMs, ChronoUnit.MILLIS);
 
-        logger.info("la hora del servidor es: {}", Date.from(issuedAt));
-        logger.info("el token expira: {}", Date.from(expiration));
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(Date.from(issuedAt))
@@ -66,7 +65,7 @@ public class JwtUtils {
     }
 
     public ResponseCookie getCleanJwtCookie(){
-        return ResponseCookie.from(jwtCookie, null).path("/api").build();
+        return ResponseCookie.from(jwtCookie, "").path("/api").build();
     }
 
     public String getUserNameFromJwtToken(String token){
@@ -76,7 +75,7 @@ public class JwtUtils {
 
     public boolean validateJwtToken(String authToken){
         try {
-            Jwts.parserBuilder().setSigningKey(key()).build().parse(authToken);
+            Jwts.parserBuilder().setSigningKey(key()).build().parseClaimsJws(authToken);
             return true;
         } catch (MalformedJwtException e){
             logger.error("Invalid JWT token: {}", e.getMessage());

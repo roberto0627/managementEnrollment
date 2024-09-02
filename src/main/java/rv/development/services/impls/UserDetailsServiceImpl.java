@@ -22,7 +22,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEntity user = userRepository.findByUsername(username)
+        UserEntity user = userRepository.findByUsernameAndActivated(username, true)
                 .orElseThrow(()-> new UsernameNotFoundException("User not found with username: " + username));
         return UserDetailsImpl.build(user);
     }

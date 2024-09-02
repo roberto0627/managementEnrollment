@@ -23,3 +23,7 @@ enrollment:
     jwtCookieName: Cookie-App
     jwtSecret: 4OUXHQ0sC0jzLmVJWa76fWHxgv98Jjib39ugEVgzwLkqCLjlbGTEuf7gB5VC6kLb
     jwtExpirationMs: 1800000
+
+logging:
+  level:
+    org.springframework.security: DEBUG

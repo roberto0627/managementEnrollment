@@ -30,21 +30,33 @@ import rv.development.securities.UserDetailsImpl;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
+@SuppressWarnings("unused")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-    @Autowired
+    private static final String ROLE_NOT_FOUND_MESSAGE = "Error: Role not found!";
+    
     AuthenticationManager authenticationManager;
-    @Autowired
     UserRepository userRepository;
-    @Autowired
     RoleRepository roleRepository;
-    @Autowired
     PasswordEncoder passwordEncoder;
-    @Autowired
     JwtUtils jwtUtils;
+    
+    @Autowired
+    AuthController(
+            AuthenticationManager authenticationManager,
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            PasswordEncoder passwordEncoder,
+            JwtUtils jwtUtils
+    ){
+        this.authenticationManager = authenticationManager;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtils = jwtUtils;
+    }
 
     @PostMapping("/signup")
     public ResponseEntity<MessageResponse> registerUser(@Valid @RequestBody SignupRequest request){
@@ -66,24 +78,24 @@ public class AuthController {
 
         if(setRoles == null){
             RoleEntity userRole = roleRepository.findByRoleName(ERole.ROLE_USER)
-                    .orElseThrow(()-> new RuntimeException("Error: Role is not found."));
+                    .orElseThrow(()-> new RuntimeException(ROLE_NOT_FOUND_MESSAGE));
             roles.add(userRole);
         } else {
             setRoles.forEach(role -> {
                 switch (role) {
                     case "admin":
                         RoleEntity adminRole = roleRepository.findByRoleName(ERole.ROLE_ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                                .orElseThrow(() -> new RuntimeException(ROLE_NOT_FOUND_MESSAGE));
                         roles.add(adminRole);
                         break;
                     case "mod":
                         RoleEntity modRole = roleRepository.findByRoleName(ERole.ROLE_MODERATOR)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                                .orElseThrow(() -> new RuntimeException(ROLE_NOT_FOUND_MESSAGE));
                         roles.add(modRole);
                         break;
                     default:
                         RoleEntity userRole = roleRepository.findByRoleName(ERole.ROLE_USER)
-                                .orElseThrow(()-> new RuntimeException("Error: Role is not found."));
+                                .orElseThrow(()-> new RuntimeException(ROLE_NOT_FOUND_MESSAGE));
                         roles.add(userRole);
                         break;
                 }
@@ -104,7 +116,7 @@ public class AuthController {
 
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
+                .toList();
 
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                 .body(new UserInfoResponse(
