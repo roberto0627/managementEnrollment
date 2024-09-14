@@ -71,6 +71,9 @@ public class AuthController {
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .createdBy(request.getCreatedBy())
+                .updatedBy(request.getUpdatedBy())
+                .activated(true)
                 .build();
 
         Set<String> setRoles = request.getRoles();

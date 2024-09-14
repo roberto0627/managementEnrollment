@@ -25,6 +25,9 @@ public class UserDetailsImpl implements UserDetails {
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
 
+    private String createdBy;
+    private String updatedBy;
+
     public static UserDetailsImpl build(UserEntity user){
         List<GrantedAuthority> authorities = user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.getRoleName().name()))
@@ -36,6 +39,8 @@ public class UserDetailsImpl implements UserDetails {
                 .email(user.getEmail())
                 .password(user.getPassword())
                 .authorities(authorities)
+                .createdBy(user.getCreatedBy())
+                .updatedBy(user.getUpdatedBy())
                 .build();
     }
 

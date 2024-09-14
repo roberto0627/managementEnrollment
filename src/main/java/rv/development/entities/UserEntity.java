@@ -34,17 +34,27 @@ public class UserEntity {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    private String createdBy = "app.registration";
+    private String createdBy;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss a", timezone = "America/Lima")
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    private String updatedBy = "app.registration";
+    private String updatedBy;
     private boolean activated;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<RoleEntity> roles;
+
+    @PrePersist
+    public void prePersist(){
+        if(createdBy == null){
+            setCreatedBy("enroll.bot");
+        }
+        if(updatedBy == null){
+            setUpdatedBy("enroll.bot");
+        }
+    }
 }
