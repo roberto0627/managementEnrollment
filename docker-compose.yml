@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:10.20-alpine
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "enrolldb"
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - enrollment-private-network
+    restart: unless-stopped
+
+  app:
+    image: jimmyej/management-enrollment:1.0.0
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - enrollment-private-network
+
+networks:
+  enrollment-private-network:
+    driver: bridge
+
+volumes:
+  postgres:

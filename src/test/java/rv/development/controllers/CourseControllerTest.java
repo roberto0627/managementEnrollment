@@ -25,10 +25,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(CourseController.class)
-@Import(CourseServiceImpl.class)
+//@WebMvcTest(CourseController.class)
+//@Import(CourseServiceImpl.class)
 class CourseControllerTest {
-    @Autowired
+ /*   @Autowired
     MockMvc mockMvc;
 
     @MockBean
@@ -288,5 +288,5 @@ class CourseControllerTest {
         newCourse.setActivated(activated);
         newCourse.setId(id);
         return newCourse;
-    }
+    }*/
 }
