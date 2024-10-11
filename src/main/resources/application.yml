@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: managementEnrollment
+  datasource:
+    hikari:
+      connectionTimeout: 20000
+      maximumPoolSize: 5
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    generate-ddl: true
+
+enrollment:
+  app:
+    jwtCookieName: Cookie-App
+    jwtSecret: ${ENROLL_APP_SECRET}
+    jwtExpirationMs: 1800000
+
+logging:
+  level:
+    org.springframework.security: DEBUG
