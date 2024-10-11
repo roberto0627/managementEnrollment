@@ -3,32 +3,40 @@ package rv.development.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import rv.development.entities.Student;
 import rv.development.repositories.StudentRepository;
+import rv.development.securities.AuthEntryPointJwt;
+import rv.development.securities.JwtUtils;
+import rv.development.securities.WebSecurityConfig;
 import rv.development.services.impls.StudentServiceImpl;
+import rv.development.services.impls.UserDetailsServiceImpl;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-//@WebMvcTest(StudentController.class)
-//@Import(StudentServiceImpl.class)
+
+@ExtendWith(SpringExtension.class)
+@WebMvcTest(StudentController.class)
+@Import({StudentServiceImpl.class, WebSecurityConfig.class, JwtUtils.class})
+@WithMockUser(username = "user", authorities={"ROLE_USER", "ROLE_ADMIN"})
 class StudentControllerTest {
-    /*@Autowired
+
+    @Autowired
     MockMvc mockMvc;
 
     @MockBean
@@ -36,6 +44,15 @@ class StudentControllerTest {
 
     @Autowired
     ObjectMapper mapper;
+
+    @MockBean
+    UserDetailsServiceImpl userDetailsService;
+
+    @MockBean
+    AuthEntryPointJwt authEntryPointJwt;
+
+    @Autowired
+    JwtUtils jwtUtils;
 
     Student  student1 = new Student(1L,"DNI", "46657897", "Jose", "Ruiz", LocalDate.of(1994,8,5), "jose.ruiz@gmail.com", true );
     Student  student2 = new Student(2L,"DNI", "46789548", "Maria", "Cruz", LocalDate.of(1996,4,11), "maria.cruz@gmail.com", true );
@@ -312,5 +329,5 @@ class StudentControllerTest {
         newStudent.setActivated(activated);
         newStudent.setId(id);
         return newStudent;
-    }*/
+    }
 }

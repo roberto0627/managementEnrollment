@@ -3,17 +3,24 @@ package rv.development.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import rv.development.entities.Course;
 import rv.development.repositories.CourseRepository;
+import rv.development.securities.AuthEntryPointJwt;
+import rv.development.securities.JwtUtils;
+import rv.development.securities.WebSecurityConfig;
 import rv.development.services.impls.CourseServiceImpl;
+import rv.development.services.impls.UserDetailsServiceImpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,10 +32,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-//@WebMvcTest(CourseController.class)
-//@Import(CourseServiceImpl.class)
+@ExtendWith(SpringExtension.class)
+@WebMvcTest(CourseController.class)
+@Import({CourseServiceImpl.class, WebSecurityConfig.class, JwtUtils.class})
+@WithMockUser(username = "user", authorities={"ROLE_USER", "ROLE_ADMIN"})
 class CourseControllerTest {
- /*   @Autowired
+    @Autowired
     MockMvc mockMvc;
 
     @MockBean
@@ -36,6 +45,15 @@ class CourseControllerTest {
 
     @Autowired
     ObjectMapper mapper;
+
+    @MockBean
+    UserDetailsServiceImpl userDetailsService;
+
+    @MockBean
+    AuthEntryPointJwt authEntryPointJwt;
+
+    @Autowired
+    JwtUtils jwtUtils;
 
     Course course1 = new Course(1L,"Matematica","MAT",true);
     Course course2 = new Course(2L,"Religion","REL",true);
@@ -288,5 +306,5 @@ class CourseControllerTest {
         newCourse.setActivated(activated);
         newCourse.setId(id);
         return newCourse;
-    }*/
+    }
 }
